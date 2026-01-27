@@ -1,10 +1,10 @@
 import { createClient } from "@libsql/client";
 
-const url = process.env.TURSO_DATABASE_URL;
-const authToken = process.env.TURSO_AUTH_TOKEN;
+const URL = process.env.TURSO_DATABASE_URL;
+const AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;
 
-if (!url || !authToken) {
+if (!URL || !AUTH_TOKEN) {
     throw new Error("Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN");
 }
 
-export const DB = createClient({ url, authToken });
+export const db = createClient({ url: URL, authToken: AUTH_TOKEN });
