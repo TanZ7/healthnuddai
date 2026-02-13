@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     // ค้นหา user จาก email
     const result = await db.execute({
-      sql: `SELECT id, email, password, first_name_th, last_name_th FROM users WHERE email = ?`,
+      sql: `SELECT identification_number, email, password, fname, lname FROM users WHERE email = ?`,
       args: [email],
     });
 
@@ -40,10 +40,10 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "เข้าสู่ระบบสำเร็จ",
       user: {
-        id: user.id,
+        identification_number: user.identification_number,
         email: user.email,
-        firstName: user.first_name_th,
-        lastName: user.last_name_th,
+        fname: user.fname,
+        lname: user.lname,
       },
     });
   } catch (error) {
