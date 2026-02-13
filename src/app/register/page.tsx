@@ -50,6 +50,18 @@ export default function RegisterPage() {
       return;
     }
 
+    if (form.identification_number.length !== 13) {
+      set_message("เลขบัตรประชาชนต้องมี 13 หลัก");
+      set_message_type("error");
+      return;
+    }
+
+    if (form.phone_number.length !== 10) {
+      set_message("เบอร์โทรศัพท์ต้องมี 10 หลัก");
+      set_message_type("error");
+      return;
+    }
+
     try {
       const response = await fetch("/api/register", {
         method: "POST",
@@ -84,10 +96,10 @@ export default function RegisterPage() {
           <h1 className={styles.title}>สมัครสมาชิก</h1>
 
           <form className={styles.formGrid} onSubmit={handle_submit}>
-            {/* Input fields start */}
+            
             <div className={styles.field}>
               <label className={styles.label}>
-                ชื่อ<span className={styles.required}>*</span>
+                คำนำหน้า<span className={styles.required}>*</span>
               </label>
               <div className={styles.radioGroup}>
                 {title_OPTIONS.map((option) => (
@@ -107,25 +119,41 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            <div className={styles.field}>
+              <label className={styles.label}>
+                เพศ<span className={styles.required}>*</span>
+              </label>
+              <div className={styles.radioGroup}>
+              {sex_OPTIONS.map((option) => (
+                <label key={option} className={styles.radioLabel}>
+                  <input type="radio" name="sex" value={option} checked={form.sex === option} onChange={handle_change} className={styles.radioInput} required />
+                  {option}
+                </label>
+              ))}
+            </div>
+            </div>
+
+            
+
             <div className={styles.fieldRow}>
               <div className={styles.field}>
                 <label htmlFor="fname" className={styles.label}>ชื่อ<span className={styles.required}>*</span></label>
-                <input id="fname" name="fname" type="text" value={form.fname} onChange={handle_change} className={styles.input} placeholder="ระบุชื่อ" required />
+                <input id="fname" name="fname" type="text" value={form.fname} onChange={handle_change} className={styles.input} placeholder="ชื่อ" required />
               </div>
               <div className={styles.field}>
                 <label htmlFor="lname" className={styles.label}>นามสกุล<span className={styles.required}>*</span></label>
-                <input id="lname" name="lname" type="text" value={form.lname} onChange={handle_change} className={styles.input} placeholder="ระบุนามสกุล" required />
+                <input id="lname" name="lname" type="text" value={form.lname} onChange={handle_change} className={styles.input} placeholder="นามสกุล" required />
               </div>
             </div>
 
             <div className={styles.fieldRow}>
               <div className={styles.field}>
                 <label htmlFor="identification_number" className={styles.label}>เลขบัตรประชาชน<span className={styles.required}>*</span></label>
-                <input id="identification_number" name="identification_number" type="text" inputMode="numeric" maxLength={13} value={form.identification_number} onChange={handle_change} className={styles.input} placeholder="ระบุเลขบัตรประชาชน" required />
+                <input id="identification_number" name="identification_number" type="text" inputMode="numeric" minLength={13} maxLength={13} pattern="[0-9]{13}" value={form.identification_number} onChange={handle_change} className={styles.input} placeholder="เลขบัตรประชาชน 13 หลัก" required />
               </div>
               <div className={styles.field}>
                 <label htmlFor="phone_number" className={styles.label}>เบอร์โทรศัพท์<span className={styles.required}>*</span></label>
-                <input id="phone_number" name="phone_number" type="tel" inputMode="tel" value={form.phone_number} onChange={handle_change} className={styles.input} placeholder="ระบุเบอร์โทรศัพท์" required />
+                <input id="phone_number" name="phone_number" type="tel" inputMode="tel" minLength={10} maxLength={10} pattern="[0-9]{10}" value={form.phone_number} onChange={handle_change} className={styles.input} placeholder="เบอร์โทรศัพท์" required />
               </div>
             </div>
 
@@ -136,26 +164,17 @@ export default function RegisterPage() {
 
             <div className={styles.field}>
               <label htmlFor="email" className={styles.label}>อีเมล<span className={styles.required}>*</span></label>
-              <input id="email" name="email" type="email" value={form.email} onChange={handle_change} className={styles.input} placeholder="ระบุอีเมล" required />
+              <input id="email" name="email" type="email" value={form.email} onChange={handle_change} className={styles.input} placeholder="อีเมล" required />
             </div>
 
             <div className={styles.field}>
               <label htmlFor="password" className={styles.label}>รหัสผ่าน<span className={styles.required}>*</span></label>
-              <input id="password" name="password" type="password" value={form.password} onChange={handle_change} className={styles.input} placeholder="ระบุรหัสผ่าน" required />
+              <input id="password" name="password" type="password" value={form.password} onChange={handle_change} className={styles.input} placeholder="รหัสผ่าน" required />
             </div>
 
             <div className={styles.field}>
               <label htmlFor="confirmPassword" className={styles.label}>ยืนยันรหัสผ่าน<span className={styles.required}>*</span></label>
-              <input id="confirmPassword" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handle_change} className={styles.input} placeholder="ระบุรหัสผ่าน" required />
-            </div>
-
-            <div className={styles.radioGroup}>
-              {sex_OPTIONS.map((option) => (
-                <label key={option} className={styles.radioLabel}>
-                  <input type="radio" name="sex" value={option} checked={form.sex === option} onChange={handle_change} className={styles.radioInput} required />
-                  {option}
-                </label>
-              ))}
+              <input id="confirmPassword" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handle_change} className={styles.input} placeholder="ยืนยันรหัสผ่าน" required />
             </div>
 
             {message && (
