@@ -128,7 +128,7 @@ export default function RegisterPage() {
               </label>
               <div className={styles.radioGroup}>
               {sex_OPTIONS.map((option) => (
-                <label key={option.label} className={styles.radioLabel}>
+                <label key={option.value} className={styles.radioLabel}>
                   <input type="radio" name="sex" value={option.value} checked={form.sex === option.value} onChange={handle_change} className={styles.radioInput} required />
                   {option.label}
                 </label>
