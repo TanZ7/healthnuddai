@@ -5,7 +5,10 @@ import { useState } from "react";
 import styles from "./register.module.css";
 
 const title_OPTIONS = ["นาย", "นาง", "นางสาว"] as const;
-const sex_OPTIONS = ["M", "F", "O"] as const;
+const sex_OPTIONS = [
+  {value:"M",label: "Male"},
+   {value:"F",label: "Female"},
+  {value:"O",label: "Other"}] as const;
 
 export default function RegisterPage() {
   const [form, set_form] = useState({
@@ -125,9 +128,9 @@ export default function RegisterPage() {
               </label>
               <div className={styles.radioGroup}>
               {sex_OPTIONS.map((option) => (
-                <label key={option} className={styles.radioLabel}>
-                  <input type="radio" name="sex" value={option} checked={form.sex === option} onChange={handle_change} className={styles.radioInput} required />
-                  {option}
+                <label key={option.value} className={styles.radioLabel}>
+                  <input type="radio" name="sex" value={option.value} checked={form.sex === option.value} onChange={handle_change} className={styles.radioInput} required />
+                  {option.label}
                 </label>
               ))}
             </div>
