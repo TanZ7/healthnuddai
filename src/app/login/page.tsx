@@ -12,7 +12,9 @@ export default function LoginPage() {
   const [email, set_email] = useState("");
   const [password, set_password] = useState("");
   const [message, set_message] = useState<string | null>(null);
-  const [messageType, setMessageType] = useState<"success" | "error">("success");
+  const [messageType, setMessageType] = useState<"success" | "error">(
+    "success",
+  );
 
   const handle_submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -52,8 +54,18 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
+      <div className={`${styles.circle} ${styles.circleTop}`}></div>
+      <div className={`${styles.circle} ${styles.circleBottom}`}></div>
       <div className={styles.wrapper}>
-        <div className={styles.formCard}>
+        <div className={styles.leftcard}>
+          <img
+            src="https://img5.pic.in.th/file/secure-sv1/healthcare-1.png"
+            alt="healthcare (1)"
+            className={styles.picture}
+          ></img>
+          <div className={styles.heroText}>สุขภาพนัดได้</div>
+        </div>
+        <div className={styles.rightcard}>
           <h1 className={styles.title}>เข้าสู่ระบบ</h1>
           <form onSubmit={handle_submit}>
             <div className={styles.formGrid}>
@@ -83,6 +95,9 @@ export default function LoginPage() {
                   required
                 />
               </div>
+              <Link href="" className={styles.link_to_reset}>
+                ลืมรหัสผ่าน
+              </Link>
               <button type="submit" className={styles.submitButton}>
                 เข้าสู่ระบบ
               </button>
@@ -91,7 +106,9 @@ export default function LoginPage() {
           {message && (
             <div
               className={`${styles.message} ${
-                messageType === "error" ? styles.messageError : styles.messageSuccess
+                messageType === "error"
+                  ? styles.messageError
+                  : styles.messageSuccess
               }`}
             >
               {message}
@@ -103,9 +120,6 @@ export default function LoginPage() {
               สมัครสมาชิก
             </Link>
           </p>
-        </div>
-        <div className={styles.heroCard}>
-          <span className={styles.heroText}>สุขภาพนัดได้</span>
         </div>
       </div>
     </div>
