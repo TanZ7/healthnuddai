@@ -50,10 +50,10 @@ export default function Dashboard() {
         <main className={styles.mainContent}>
           <div className={styles.welcomeCard}>
             <h1 className={styles.welcomeTitle}>
-              {user ? `สวัสดี, ${user.firstName}!` : "ยินดีต้อนรับ!"}
+              {user ? `สวัสดี, ${user.fname}!` : "ยินดีต้อนรับ!"}
             </h1>
             <p className={styles.welcomeSubtitle}>
-              {user 
+              {user
                 ? "ยินดีต้อนรับกลับมา วันนี้คุณต้องการนัดหมายอะไรไหม?"
                 : "เข้าสู่ระบบเพื่อจัดการนัดหมายของคุณ"
               }
