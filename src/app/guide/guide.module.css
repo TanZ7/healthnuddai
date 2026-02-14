@@ -1,0 +1,220 @@
+.container {
+  min-height: 100vh;
+  background: #F7FFF4;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero Section */
+.hero {
+  background: linear-gradient(135deg, #3d9d82 0%, #5bc4a8 100%);
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.heroTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.heroSubtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Content */
+.content {
+  flex: 1;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+}
+
+/* Steps Card */
+.stepsCard {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.stepsHeader {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Steps List */
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stepItem {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fdf8;
+  border-radius: 12px;
+  border-left: 4px solid #3d9d82;
+}
+
+.stepNumber {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  background: #3d9d82;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.stepContent {
+  flex: 1;
+}
+
+.stepTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.stepDescription {
+  font-size: 0.875rem;
+  color: #718096;
+  line-height: 1.6;
+}
+
+/* Accordion */
+.accordionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.accordionItem {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.accordionHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #2d3748;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.accordionHeader:hover {
+  background: #f8fdf8;
+}
+
+.accordionIcon {
+  font-size: 0.75rem;
+  color: #3d9d82;
+  transition: transform 0.2s;
+}
+
+.accordionIconOpen {
+  transform: rotate(180deg);
+}
+
+.accordionContent {
+  padding: 0 1.25rem 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.accordionContent p {
+  font-size: 0.875rem;
+  color: #718096;
+  line-height: 1.8;
+  margin: 0.25rem 0;
+}
+
+/* Contact Card */
+.contactCard {
+  background: #e8e8e8;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.contactInfo p {
+  font-size: 0.95rem;
+  color: #2d3748;
+  margin: 0.5rem 0;
+}
+
+.contactInfo strong {
+  color: #3d9d82;
+}
+
+/* Footer */
+.footer {
+  background: #3d9d82;
+  color: white;
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: auto;
+}
+
+.footer p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .stepsCard {
+    padding: 1rem;
+  }
+
+  .stepItem {
+    padding: 0.75rem;
+  }
+
+  .stepNumber {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    font-size: 0.8rem;
+  }
+}

@@ -39,8 +39,6 @@
 
 .navLinkActive {
   border-bottom-color: white;
-  text-decoration: underline;
-  text-underline-offset: 4px;
 }
 
 .menuButton {

@@ -59,7 +59,7 @@ export default function Navbar() {
         {user ? (
           <>
             <span className={styles.userName}>
-              {user.firstName} {user.lastName}
+              {user.fname} {user.lname}
             </span>
             <button onClick={handle_logout} className={styles.logoutButton}>
               ออกจากระบบ
@@ -98,7 +98,7 @@ export default function Navbar() {
           {user ? (
             <>
               <span className={styles.userName}>
-                {user.firstName} {user.lastName}
+                {user.fname} {user.lname}
               </span>
               <button onClick={handle_logout} className={styles.logoutButton}>
                 ออกจากระบบ

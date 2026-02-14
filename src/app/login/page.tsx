@@ -66,7 +66,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => set_email(e.target.value)}
                   className={styles.input}
-                  placeholder="กรุณากรอกอีเมลของคุณ"
+                  placeholder="อีเมลของคุณ"
                   required
                 />
               </div>
@@ -79,7 +79,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => set_password(e.target.value)}
                   className={styles.input}
-                  placeholder="กรุณากรอกรหัสผ่าน"
+                  placeholder="รหัสผ่าน"
                   required
                 />
               </div>

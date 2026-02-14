@@ -1,0 +1,253 @@
+.container {
+  min-height: 100vh;
+  background: #F7FFF4;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero Section */
+.hero {
+  background: linear-gradient(135deg, #3d9d82 0%, #5bc4a8 100%);
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.heroTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.heroSubtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Content */
+.content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 2rem;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #718096;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.tab:hover {
+  color: #3d9d82;
+}
+
+.tabActive {
+  color: #3d9d82;
+}
+
+.tabActive::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #3d9d82;
+  border-radius: 2px 2px 0 0;
+}
+
+/* Doctors Grid */
+.doctorsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+/* Doctor Card */
+.doctorCard {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.doctorCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.doctorImage {
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imagePlaceholder {
+  font-size: 4rem;
+}
+
+.doctorInfo {
+  padding: 1.25rem;
+}
+
+.doctorName {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.doctorDepartment {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-bottom: 0.375rem;
+}
+
+.doctorSchedule {
+  font-size: 0.8rem;
+  color: #a0aec0;
+  margin-bottom: 1rem;
+}
+
+.detailButton {
+  background: #3d9d82;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.detailButton:hover {
+  background: #348f72;
+}
+
+/* Departments Grid */
+.departmentsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.departmentCard {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid #e2e8f0;
+}
+
+.departmentCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-color: #3d9d82;
+}
+
+.departmentIcon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.departmentName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #3d9d82;
+  margin-bottom: 0.25rem;
+}
+
+.doctorCount {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-bottom: 1rem;
+}
+
+.servicesList {
+  text-align: left;
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.servicesList li {
+  font-size: 0.85rem;
+  color: #4a5568;
+  margin-bottom: 0.375rem;
+  line-height: 1.4;
+}
+
+.departmentDesc {
+  font-size: 0.9rem;
+  color: #718096;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Footer */
+.footer {
+  background: #3d9d82;
+  color: white;
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: auto;
+}
+
+.footer p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .doctorsGrid,
+  .departmentsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+
+  .doctorsGrid,
+  .departmentsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    gap: 1rem;
+  }
+
+  .tab {
+    font-size: 1rem;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+}

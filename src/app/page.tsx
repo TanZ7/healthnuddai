@@ -42,7 +42,7 @@ export default function Dashboard() {
             </Link>
             <Link href="/profile" className={styles.menuItem}>
               <span className={styles.menuIcon}>👤</span>
-              โปรไฟล์
+              ข้อมูลของฉัน
             </Link>
           </nav>
         </aside>

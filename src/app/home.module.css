@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #6dd5b8 0%, #86e3ce 50%, #a8f5e7 100%);
+  background: #F7FFF4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,7 +53,7 @@
 .primaryButton {
   width: 100%;
   padding: 1rem 2rem;
-  background: #48bb98;
+  background: #3d9d82;
   color: white;
   border: none;
   border-radius: 12px;
@@ -66,7 +66,7 @@
 }
 
 .primaryButton:hover {
-  background: #3da884;
+  background: #348f72;
   transform: translateY(-2px);
 }
 
@@ -74,8 +74,8 @@
   width: 100%;
   padding: 1rem 2rem;
   background: white;
-  color: #48bb98;
-  border: 2px solid #48bb98;
+  color: #3d9d82;
+  border: 2px solid #3d9d82;
   border-radius: 12px;
   font-size: 1.125rem;
   font-weight: 600;
@@ -91,7 +91,7 @@
 }
 
 .heroCard {
-  background: linear-gradient(135deg, #48bb98 0%, #6dd5b8 100%);
+  background: linear-gradient(135deg, #3d9d82 0%, #5bc4a8 100%);
   border-radius: 24px;
   padding: 3rem;
   display: flex;
@@ -141,7 +141,7 @@
 .featureIcon {
   width: 20px;
   height: 20px;
-  background: #48bb98;
+  background: #3d9d82;
   border-radius: 50%;
   display: flex;
   align-items: center;
