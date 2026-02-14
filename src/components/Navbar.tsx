@@ -31,7 +31,7 @@ export default function Navbar() {
 
   const NAV_ITEMS = [
     { href: "/", label: "หน้าหลัก" },
-    { href: "/book", label: "จองนัด" },
+    { href: "/booking", label: "จองนัด" },
     { href: "/queue", label: "คิวเรียลไทม์" },
     { href: "/doctors", label: "แพทย์และแผนก" },
     { href: "/guide", label: "คู่มือ/วิธีใช้" },
