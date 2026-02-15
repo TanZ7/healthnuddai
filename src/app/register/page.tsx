@@ -6,9 +6,10 @@ import styles from "./register.module.css";
 
 const title_OPTIONS = ["นาย", "นาง", "นางสาว"] as const;
 const sex_OPTIONS = [
-  {value:"M",label: "Male"},
-   {value:"F",label: "Female"},
-  {value:"O",label: "Other"}] as const;
+  { value: "M", label: "Male" },
+  { value: "F", label: "Female" },
+  { value: "O", label: "Other" },
+] as const;
 
 export default function RegisterPage() {
   const [form, set_form] = useState({
@@ -25,10 +26,14 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
   const [message, set_message] = useState<string | null>(null);
-  const [messageType, set_message_type] = useState<"error" | "success">("error");
+  const [messageType, set_message_type] = useState<"error" | "success">(
+    "error",
+  );
 
   const handle_change = (
-    event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>,
+    event:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const { name, value } = event.target;
     set_form((current) => ({ ...current, [name]: value }));
@@ -44,8 +49,14 @@ export default function RegisterPage() {
     }
 
     const required =
-      form.title && form.fname && form.lname && form.identification_number &&
-      form.phone_number && form.birth_date && form.email && form.password;
+      form.title &&
+      form.fname &&
+      form.lname &&
+      form.identification_number &&
+      form.phone_number &&
+      form.birth_date &&
+      form.email &&
+      form.password;
 
     if (!required) {
       set_message("กรุณากรอกข้อมูลให้ครบถ้วน");
@@ -78,9 +89,17 @@ export default function RegisterPage() {
         set_message("สมัครสมาชิกสำเร็จ!");
         set_message_type("success");
         set_form({
-          title: "", fname: "", lname: "", identification_number: "",
-          phone_number: "", birth_date: "", email: "", sex: "",
-          password: "", confirmPassword: "", role: "patient"
+          title: "",
+          fname: "",
+          lname: "",
+          identification_number: "",
+          phone_number: "",
+          birth_date: "",
+          email: "",
+          sex: "",
+          password: "",
+          confirmPassword: "",
+          role: "patient",
         });
       } else {
         set_message(data.error || "เกิดข้อผิดพลาด");
@@ -94,12 +113,12 @@ export default function RegisterPage() {
 
   return (
     <main className={styles.container}>
+      <div className={`${styles.circle} ${styles.circleTop}`}></div>
+      <div className={`${styles.circle} ${styles.circleBottom}`}></div>
       <div className={styles.wrapper}>
-        <div className={styles.formCard}>
+        <div className={styles.leftcard}>
           <h1 className={styles.title}>สมัครสมาชิก</h1>
-
           <form className={styles.formGrid} onSubmit={handle_submit}>
-            
             <div className={styles.field}>
               <label className={styles.label}>
                 คำนำหน้า<span className={styles.required}>*</span>
@@ -127,61 +146,164 @@ export default function RegisterPage() {
                 เพศ<span className={styles.required}>*</span>
               </label>
               <div className={styles.radioGroup}>
-              {sex_OPTIONS.map((option) => (
-                <label key={option.value} className={styles.radioLabel}>
-                  <input type="radio" name="sex" value={option.value} checked={form.sex === option.value} onChange={handle_change} className={styles.radioInput} required />
-                  {option.label}
+                {sex_OPTIONS.map((option) => (
+                  <label key={option.value} className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="sex"
+                      value={option.value}
+                      checked={form.sex === option.value}
+                      onChange={handle_change}
+                      className={styles.radioInput}
+                      required
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.fieldRow}>
+              <div className={styles.field}>
+                <label htmlFor="fname" className={styles.label}>
+                  ชื่อ<span className={styles.required}>*</span>
                 </label>
-              ))}
+                <input
+                  id="fname"
+                  name="fname"
+                  type="text"
+                  value={form.fname}
+                  onChange={handle_change}
+                  className={styles.input}
+                  placeholder="ชื่อ"
+                  required
+                />
+              </div>
+              <div className={styles.field}>
+                <label htmlFor="lname" className={styles.label}>
+                  นามสกุล<span className={styles.required}>*</span>
+                </label>
+                <input
+                  id="lname"
+                  name="lname"
+                  type="text"
+                  value={form.lname}
+                  onChange={handle_change}
+                  className={styles.input}
+                  placeholder="นามสกุล"
+                  required
+                />
+              </div>
             </div>
-            </div>
-
-            
 
             <div className={styles.fieldRow}>
               <div className={styles.field}>
-                <label htmlFor="fname" className={styles.label}>ชื่อ<span className={styles.required}>*</span></label>
-                <input id="fname" name="fname" type="text" value={form.fname} onChange={handle_change} className={styles.input} placeholder="ชื่อ" required />
+                <label htmlFor="identification_number" className={styles.label}>
+                  เลขบัตรประชาชน<span className={styles.required}>*</span>
+                </label>
+                <input
+                  id="identification_number"
+                  name="identification_number"
+                  type="text"
+                  inputMode="numeric"
+                  minLength={13}
+                  maxLength={13}
+                  pattern="[0-9]{13}"
+                  value={form.identification_number}
+                  onChange={handle_change}
+                  className={styles.input}
+                  placeholder="เลขบัตรประชาชน 13 หลัก"
+                  required
+                />
               </div>
               <div className={styles.field}>
-                <label htmlFor="lname" className={styles.label}>นามสกุล<span className={styles.required}>*</span></label>
-                <input id="lname" name="lname" type="text" value={form.lname} onChange={handle_change} className={styles.input} placeholder="นามสกุล" required />
+                <label htmlFor="phone_number" className={styles.label}>
+                  เบอร์โทรศัพท์<span className={styles.required}>*</span>
+                </label>
+                <input
+                  id="phone_number"
+                  name="phone_number"
+                  type="tel"
+                  inputMode="tel"
+                  minLength={10}
+                  maxLength={10}
+                  pattern="[0-9]{10}"
+                  value={form.phone_number}
+                  onChange={handle_change}
+                  className={styles.input}
+                  placeholder="เบอร์โทรศัพท์"
+                  required
+                />
               </div>
             </div>
 
-            <div className={styles.fieldRow}>
-              <div className={styles.field}>
-                <label htmlFor="identification_number" className={styles.label}>เลขบัตรประชาชน<span className={styles.required}>*</span></label>
-                <input id="identification_number" name="identification_number" type="text" inputMode="numeric" minLength={13} maxLength={13} pattern="[0-9]{13}" value={form.identification_number} onChange={handle_change} className={styles.input} placeholder="เลขบัตรประชาชน 13 หลัก" required />
-              </div>
-              <div className={styles.field}>
-                <label htmlFor="phone_number" className={styles.label}>เบอร์โทรศัพท์<span className={styles.required}>*</span></label>
-                <input id="phone_number" name="phone_number" type="tel" inputMode="tel" minLength={10} maxLength={10} pattern="[0-9]{10}" value={form.phone_number} onChange={handle_change} className={styles.input} placeholder="เบอร์โทรศัพท์" required />
-              </div>
+            <div className={styles.field}>
+              <label htmlFor="birth_date" className={styles.label}>
+                วัน/เดือน/ ปีเกิด<span className={styles.required}>*</span>
+              </label>
+              <input
+                id="birth_date"
+                name="birth_date"
+                type="date"
+                value={form.birth_date}
+                onChange={handle_change}
+                className={styles.input}
+                required
+              />
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="birth_date" className={styles.label}>วัน/เดือน/ ปีเกิด<span className={styles.required}>*</span></label>
-              <input id="birth_date" name="birth_date" type="date" value={form.birth_date} onChange={handle_change} className={styles.input} required />
+              <label htmlFor="email" className={styles.label}>
+                อีเมล<span className={styles.required}>*</span>
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handle_change}
+                className={styles.input}
+                placeholder="อีเมล"
+                required
+              />
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="email" className={styles.label}>อีเมล<span className={styles.required}>*</span></label>
-              <input id="email" name="email" type="email" value={form.email} onChange={handle_change} className={styles.input} placeholder="อีเมล" required />
+              <label htmlFor="password" className={styles.label}>
+                รหัสผ่าน<span className={styles.required}>*</span>
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={form.password}
+                onChange={handle_change}
+                className={styles.input}
+                placeholder="รหัสผ่าน"
+                required
+              />
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="password" className={styles.label}>รหัสผ่าน<span className={styles.required}>*</span></label>
-              <input id="password" name="password" type="password" value={form.password} onChange={handle_change} className={styles.input} placeholder="รหัสผ่าน" required />
-            </div>
-
-            <div className={styles.field}>
-              <label htmlFor="confirmPassword" className={styles.label}>ยืนยันรหัสผ่าน<span className={styles.required}>*</span></label>
-              <input id="confirmPassword" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handle_change} className={styles.input} placeholder="ยืนยันรหัสผ่าน" required />
+              <label htmlFor="confirmPassword" className={styles.label}>
+                ยืนยันรหัสผ่าน<span className={styles.required}>*</span>
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={form.confirmPassword}
+                onChange={handle_change}
+                className={styles.input}
+                placeholder="ยืนยันรหัสผ่าน"
+                required
+              />
             </div>
 
             {message && (
-              <div className={`${styles.message} ${messageType === "error" ? styles.messageError : styles.messageSuccess}`}>
+              <div
+                className={`${styles.message} ${messageType === "error" ? styles.messageError : styles.messageSuccess}`}
+              >
                 {message}
               </div>
             )}
@@ -191,15 +313,21 @@ export default function RegisterPage() {
             </button>
 
             <div className={styles.footer}>
-              หรือ <Link href="/login" className={styles.link}>เข้าสู่ระบบ</Link>
+              หรือ{" "}
+              <Link href="/login" className={styles.link}>
+                เข้าสู่ระบบ
+              </Link>
             </div>
           </form>
         </div>
-      </div>
-
-      <div className={styles.heroCard}>
-        {/* TODO: เพิ่มรูปโลโก้ทีหลัง */}
-        <h2 className={styles.heroText}>สุขภาพนัดได้</h2>
+        <div className={styles.rightcard}>
+          <img
+            src="https://img5.pic.in.th/file/secure-sv1/healthcare-1.png"
+            alt="healthcare (1)"
+            className={styles.picture}
+          ></img>
+          <h1 className={styles.heroText}>สุขภาพนัดได้</h1>
+        </div>
       </div>
     </main>
   );
