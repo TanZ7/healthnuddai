@@ -88,7 +88,27 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id_number = searchParams.get("id_number");
+    const all = searchParams.get("all");
 
+    // ถ้าส่ง all=true → ดึงคิวทั้งหมด (pending + done)
+    if (all === "true") {
+      const data = await db.execute({
+        sql: `
+          SELECT 
+            a.ap_id, a.date, a.time, a.status, a.fname, a.lname, a.title,
+            d.dno, 
+            d.name AS department_name 
+          FROM appointments a
+          LEFT JOIN department d ON a.departmentId = d.dno
+          WHERE (a.status IS NULL OR a.status = 'pending' OR a.status = 'done')
+          ORDER BY a.date ASC, a.time ASC
+        `,
+        args: [],
+      });
+      return NextResponse.json({ success: true, data: data.rows });
+    }
+
+    // ถ้าไม่มี id_number → error
     if (!id_number) {
       return NextResponse.json({ success: false, error: "Missing ID" }, { status: 400 });
     }
