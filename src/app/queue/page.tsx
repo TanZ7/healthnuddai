@@ -1,12 +1,30 @@
 "use client"
 
+import { useEffect, useState, useCallback } from "react"
+
+interface DeptQueue {
+  dno: number
+  name: string
+  currentCode: string
+  waitTime: string
+  waiting: number
+  total: number
+}
+
+const BORDER_COLORS: { [key: number]: string } = {
+  1: "border-blue-500",
+  2: "border-purple-500",
+  3: "border-yellow-500",
+  4: "border-pink-500",
+  5: "border-red-500",
+  6: "border-green-600",
+}
+
 type QueueCardProps = {
   title: string
   code: string
   wait: string
-  left: number
-  processing: number
-  total: number
+  waiting: number
   borderColor: string
 }
 
@@ -14,9 +32,7 @@ function QueueCard({
   title,
   code,
   wait,
-  left,
-  processing,
-  total,
+  waiting,
   borderColor,
 }: QueueCardProps) {
   return (
@@ -36,18 +52,10 @@ function QueueCard({
         รอประมาณ {wait}
       </div>
 
-      <div className="flex justify-between text-xs text-gray-500">
+      <div className="flex justify-center text-xs text-gray-500">
         <div className="text-center">
-          <p className="font-bold text-black">{left}</p>
-          <p>รอคิว</p>
-        </div>
-        <div className="text-center">
-          <p className="font-bold text-black">{processing}</p>
-          <p>กำลังตรวจ</p>
-        </div>
-        <div className="text-center">
-          <p className="font-bold text-black">{total}</p>
-          <p>ทั้งหมด</p>
+          <p className="font-bold text-black text-lg">{waiting}</p>
+          <p>คิวที่รอตรวจ</p>
         </div>
       </div>
     </div>
@@ -55,6 +63,40 @@ function QueueCard({
 }
 
 export default function QueuePage() {
+  const [queues, setQueues] = useState<DeptQueue[]>([])
+  const [loading, setLoading] = useState(true)
+  const [lastUpdate, setLastUpdate] = useState<string>("")
+
+  const fetch_queues = useCallback(async () => {
+    try {
+      const res = await fetch("/api/queue")
+      const data = await res.json()
+      if (data.success) {
+        setQueues(data.data)
+        setLastUpdate(new Date().toLocaleTimeString("th-TH"))
+      }
+    } catch (error) {
+      console.error("Fetch error:", error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetch_queues()
+    // อัพเดททุก 30 วินาที
+    const interval = setInterval(fetch_queues, 30000)
+    return () => clearInterval(interval)
+  }, [fetch_queues])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-green-100 flex justify-center items-center">
+        <p className="text-green-700 text-xl">กำลังโหลดข้อมูลคิว...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-green-100 flex justify-center py-10">
       <div className="bg-green-200 w-full max-w-5xl rounded-3xl p-8 shadow-xl">
@@ -62,71 +104,29 @@ export default function QueuePage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-green-700">คิวเรียลไทม์</h1>
-          <p className="text-green-600 text-sm">อัปเดตทุก 30 วินาที</p>
+          <p className="text-green-600 text-sm">อัปเดตล่าสุด: {lastUpdate} (ทุก 30 วินาที)</p>
         </div>
 
         {/* Grid */}
         <div className="grid md:grid-cols-2 gap-6">
-          <QueueCard
-            title="อายุรกรรม"
-            code="A14"
-            wait="30 นาที"
-            left={9}
-            processing={13}
-            total={23}
-            borderColor="border-blue-500"
-          />
-
-          <QueueCard
-            title="ศัลยกรรม"
-            code="B09"
-            wait="45 นาที"
-            left={2}
-            processing={8}
-            total={11}
-            borderColor="border-purple-500"
-          />
-
-          <QueueCard
-            title="ทันตกรรม"
-            code="C22"
-            wait="20 นาที"
-            left={6}
-            processing={21}
-            total={28}
-            borderColor="border-green-500"
-          />
-
-          <QueueCard
-            title="กุมารเวชกรรม"
-            code="D05"
-            wait="25 นาที"
-            left={2}
-            processing={4}
-            total={7}
-            borderColor="border-yellow-500"
-          />
-
-          <QueueCard
-            title="ศัลยกรรมกระดูก"
-            code="E06"
-            wait="50 นาที"
-            left={4}
-            processing={6}
-            total={10}
-            borderColor="border-red-500"
-          />
-
-          <QueueCard
-            title="ตรวจสุขภาพ"
-            code="F15"
-            wait="20 นาที"
-            left={8}
-            processing={14}
-            total={23}
-            borderColor="border-green-600"
-          />
+          {queues.map((dept) => (
+            <QueueCard
+              key={dept.dno}
+              title={dept.name}
+              code={dept.currentCode}
+              wait={dept.waitTime}
+              waiting={dept.waiting}
+              borderColor={BORDER_COLORS[dept.dno] || "border-gray-500"}
+            />
+          ))}
         </div>
+
+        {queues.length === 0 && (
+          <div className="text-center text-gray-600 py-10">
+            <p className="text-5xl mb-4">📋</p>
+            <p>ยังไม่มีคิววันนี้</p>
+          </div>
+        )}
       </div>
     </div>
   )

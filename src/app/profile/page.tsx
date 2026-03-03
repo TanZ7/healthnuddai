@@ -50,21 +50,33 @@ export default function ProfilePage() {
 
 
   const is_expired = (appointmentDate: string, appointmentTime: string) => {
+    if (!appointmentDate || !appointmentTime) return false;
+    
     const now = new Date();
-    const todayStr = now.toLocaleDateString('en-CA');
     const apDateStr = appointmentDate.split('T')[0];
+    const [apYear, apMonth, apDay] = apDateStr.split('-').map(Number);
+    const apDate = new Date(apYear, apMonth - 1, apDay);
+    
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    if (apDateStr < todayStr) return true;
+    // ถ้าวันนัดอยู่ในอดีต
+    if (apDate < today) return true;
 
-    if (apDateStr === todayStr) {
-      const currentTimeInMinutes = (now.getHours() * 60) + now.getMinutes();
-      const [apHour] = appointmentTime.split(":").map(Number);
-      const morningEnd = 9 * 60;
-      const afternoonEnd = 13 * 60;
+    // ถ้าวันนัดอยู่ในอนาคต
+    if (apDate > today) return false;
 
-      if (apHour < 12 && currentTimeInMinutes > morningEnd) return true;
-      if (apHour >= 12 && currentTimeInMinutes > afternoonEnd) return true;
-    }
+    // ถ้าเป็นวันเดียวกัน → เช็คเวลา
+    const currentTimeInMinutes = (now.getHours() * 60) + now.getMinutes();
+    const morningEnd = 9 * 60;   // 09:00
+    const afternoonEnd = 13 * 60; // 13:00
+
+    // รองรับ format "morning"/"afternoon" และ "HH:MM"
+    const isMorning = appointmentTime.toLowerCase() === 'morning' || 
+                      (appointmentTime.includes(':') && parseInt(appointmentTime.split(':')[0]) < 12);
+    
+    if (isMorning && currentTimeInMinutes > morningEnd) return true;
+    if (!isMorning && currentTimeInMinutes > afternoonEnd) return true;
+    
     return false;
   };
 
@@ -95,20 +107,29 @@ export default function ProfilePage() {
   }, [appointments, fetchAppointments]);
 
   const can_confirm = (appointmentTime: string, appointmentDate: string) => {
+    if (!appointmentDate || !appointmentTime) return false;
+    
     const now = new Date();
-    const todayStr = now.toLocaleDateString('en-CA');
     const apDateStr = appointmentDate.split('T')[0];
-    if (todayStr !== apDateStr) return false;
+    const [apYear, apMonth, apDay] = apDateStr.split('-').map(Number);
+    const apDate = new Date(apYear, apMonth - 1, apDay);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // ต้องเป็นวันนัดเท่านั้น
+    if (apDate.getTime() !== today.getTime()) return false;
 
     const currentTimeInMinutes = (now.getHours() * 60) + now.getMinutes();
 
-    const morningStart = 8 * 60;
-    const morningEnd = 9 * 60;
-    const afternoonStart = 12 * 60;
-    const afternoonEnd = 13 * 60;
+    const morningStart = 8 * 60;   // 08:00
+    const morningEnd = 9 * 60;     // 09:00
+    const afternoonStart = 12 * 60; // 12:00
+    const afternoonEnd = 13 * 60;   // 13:00
 
-    const [apHour] = appointmentTime.split(":").map(Number);
-    if (apHour < 12) {
+    // รองรับ format "morning"/"afternoon" และ "HH:MM"
+    const isMorning = appointmentTime.toLowerCase() === 'morning' || 
+                      (appointmentTime.includes(':') && parseInt(appointmentTime.split(':')[0]) < 12);
+    
+    if (isMorning) {
       return currentTimeInMinutes >= morningStart && currentTimeInMinutes <= morningEnd;
     } else {
       return currentTimeInMinutes >= afternoonStart && currentTimeInMinutes <= afternoonEnd;
@@ -143,9 +164,10 @@ export default function ProfilePage() {
     (!ap.status || ap.status === "pending") && !is_expired(ap.date, ap.time)
   );
 
-
   const history = appointments.filter(ap =>
-    ap.status === "done" || ap.status === "cancel" || is_expired(ap.date, ap.time)
+    ap.status === "done" || 
+    ap.status === "cancel" || 
+    (is_expired(ap.date, ap.time) && ap.status !== "done")
   );
 
   return (
@@ -201,8 +223,17 @@ export default function ProfilePage() {
 
                   <div className={styles.appointmentActions}>
                     <button className={styles.confirmButton}
-                      onClick={() => handle_status_update(ap.ap_id,"done")}
-                      disabled={ !isConfirmable || isActionLoading}>
+                      onClick={() => {
+                        if (!isConfirmable) {
+                          const isMorning = ap.time?.toLowerCase() === 'morning' || 
+                            (ap.time?.includes(':') && parseInt(ap.time.split(':')[0]) < 12);
+                          const timeSlot = isMorning ? "08:00-09:00 น." : "12:00-13:00 น.";
+                          alert(`ยังไม่ถึงเวลายืนยัน!\n\nกรุณากดยืนยันในวันนัด (${ap.date?.split('T')[0]})\nช่วงเวลา: ${timeSlot}`);
+                          return;
+                        }
+                        handle_status_update(ap.ap_id,"done");
+                      }}
+                      disabled={isActionLoading}>
                       ยืนยันนัด
                     </button>
 

@@ -353,11 +353,19 @@ export default function BookingPage() {
     return getQuota(selectedDept, dateToStr(selectedDate), periodId);
   };
 
+  // แปลง Date เป็น YYYY-MM-DD โดยไม่ใช้ UTC
+  const format_local_date = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSubmit = async () => {
     const payload = {
       identificationNumber: formData.idNumber,
       time: selectedTime, 
-      date: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
+      date: selectedDate ? format_local_date(selectedDate) : null,
       title: formData.title,
       fname: formData.firstName,
       lname: formData.lastName,

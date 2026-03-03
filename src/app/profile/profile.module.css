@@ -308,6 +308,88 @@
   font-weight: 600;
 }
 
+/* Queue Card - Real-time */
+.queueCard {
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  border-radius: 24px;
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+}
+
+.queueTitle {
+  color: #333;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.queueGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.queueItem {
+  background: white;
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+}
+
+.queueCode {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #3d9d82;
+  letter-spacing: 2px;
+}
+
+.queueDept {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.queueTime {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.25rem;
+}
+
+/* Confirmed Card */
+.confirmedCard {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1rem;
+  border: 2px solid #4ade80;
+}
+
+.confirmedBanner {
+  background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.statusBadgeDone {
+  display: inline-block;
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 /* Footer */
 .footer {
   background: #3d9d82;

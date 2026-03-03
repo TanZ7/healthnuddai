@@ -128,6 +128,47 @@
   font-size: 1.25rem;
 }
 
+/* My Queue Section in Sidebar */
+.myQueueSection {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.myQueueList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.myQueueItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #48bb98 0%, #6dd5b8 100%);
+  border-radius: 12px;
+  color: white;
+}
+
+.myQueueCode {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.myQueueDept {
+  font-size: 0.85rem;
+  opacity: 0.95;
+}
+
+.noQueue {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
 .mainContent {
   display: flex;
   flex-direction: column;
@@ -155,7 +196,7 @@
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 }
 
@@ -274,6 +315,31 @@
   color: #059669;
 }
 
+.dateConfirmed {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.queueBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  color: white;
+}
+
+.queueLabel {
+  font-size: 0.7rem;
+  opacity: 0.9;
+}
+
+.queueNumber {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
 .emptyState {
   text-align: center;
   padding: 3rem;
@@ -342,6 +408,72 @@
 
 .loginButton:hover {
   background: #3da884;
+}
+
+/* Queue Card - Real-time */
+.queueCard {
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+}
+
+.queueTitle {
+  color: #333;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.queueGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.queueItem {
+  background: white;
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+}
+
+.queueCode {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #3d9d82;
+  letter-spacing: 2px;
+}
+
+.queueDept {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.queueTime {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.25rem;
+}
+
+.queueEmpty {
+  text-align: center;
+  padding: 1rem;
+  color: #555;
+}
+
+.queueEmpty p {
+  margin: 0.25rem 0;
+}
+
+.queueHint {
+  font-size: 0.85rem;
+  color: #777;
 }
 
 @media (max-width: 768px) {
