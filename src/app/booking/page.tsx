@@ -31,18 +31,9 @@ const PERIODS = [
   },
 ];
 
-const quotaCache: Record<string, { max: number; booked: number }> = {};
-function getQuota(deptId: number, dateStr: string, periodId: string) {
-  const key = `${deptId}-${dateStr}-${periodId}`;
-  if (!quotaCache[key]) {
-    const max = Math.floor(Math.random() * 4) + 5;
-    const booked = Math.floor(Math.random() * max);
-    quotaCache[key] = { max, booked };
-  }
-  return quotaCache[key];
-}
-function dateToStr(d: Date) {
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+interface QuotaData {
+  morning: { max: number; booked: number; remaining: number };
+  afternoon: { max: number; booked: number; remaining: number };
 }
 
 const THAI_MONTHS_FULL = [
@@ -153,6 +144,8 @@ export default function BookingPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const [dbDepartments, setDbDepartments] = useState<any[]>([]);
+  const [quotaData, setQuotaData] = useState<QuotaData | null>(null);
+  const [quotaLoading, setQuotaLoading] = useState(false);
 
   const [birthDateObj, setBirthDateObj] = useState<Date | null>(null);
 
@@ -212,10 +205,36 @@ export default function BookingPage() {
     }
   };
 
+  // Fetch quota data when department and date are selected
+  const fetchQuota = useCallback(async (deptId: number, date: Date) => {
+    setQuotaLoading(true);
+    try {
+      const dateStr = format_local_date(date);
+      const res = await fetch(`/api/booking/quota?departmentId=${deptId}&date=${dateStr}`);
+      const data = await res.json();
+      if (data.success) {
+        setQuotaData(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching quota:", error);
+    } finally {
+      setQuotaLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     load_user();
     fetchDepartments();
   }, [load_user, fetchDepartments]);
+
+  // Fetch quota when department and date change
+  useEffect(() => {
+    if (selectedDept && selectedDate) {
+      fetchQuota(selectedDept, selectedDate);
+    } else {
+      setQuotaData(null);
+    }
+  }, [selectedDept, selectedDate, fetchQuota]);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -349,8 +368,12 @@ export default function BookingPage() {
 
   // quota helper
   const getPeriodQuota = (periodId: string) => {
-    if (!selectedDate || !selectedDept) return { max: 0, booked: 0 };
-    return getQuota(selectedDept, dateToStr(selectedDate), periodId);
+    if (!quotaData) return { max: 6, booked: 0 };
+    if (periodId === "morning") {
+      return { max: quotaData.morning.max, booked: quotaData.morning.booked };
+    } else {
+      return { max: quotaData.afternoon.max, booked: quotaData.afternoon.booked };
+    }
   };
 
   // แปลง Date เป็น YYYY-MM-DD โดยไม่ใช้ UTC
@@ -508,6 +531,8 @@ export default function BookingPage() {
               <h3 className={styles.sectionTitle}>เลือกช่วงเวลา</h3>
               {!selectedDate ? (
                 <p className={styles.selectDateFirst}>กรุณาเลือกวันที่ก่อน</p>
+              ) : quotaLoading ? (
+                <p className={styles.selectDateFirst}>กำลังโหลดข้อมูลคิว...</p>
               ) : (
                 <div className={styles.periodGrid}>
                   {PERIODS.map((period) => {
@@ -599,11 +624,6 @@ export default function BookingPage() {
               <div className={styles.formGroup}>
                 <label className={styles.label}>วัน/เดือน/ปีเกิด *</label>
                 <BirthDatePicker value={birthDateObj} onChange={handleBirthSelect} />
-                {formData.birthDate && (
-                  <div className={styles.bpSelectedHint}>
-                    📌 ค่าที่บันทึก: <strong>{formData.birthDate}</strong>
-                  </div>
-                )}
               </div>
 
               <div className={styles.formGroup}>

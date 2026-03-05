@@ -316,14 +316,14 @@
 }
 
 .dateConfirmed {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  background: linear-gradient(135deg, #48bb98 0%, #3da884 100%);
 }
 
 .queueBadge {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  background: linear-gradient(135deg, #48bb98 0%, #3da884 100%);
   padding: 0.5rem 1rem;
   border-radius: 12px;
   color: white;

@@ -78,14 +78,28 @@ export default function Dashboard() {
     fetch_appointments();
   }, [load_user, fetch_appointments]);
 
-  // นัดหมายที่กำลังจะมาถึง (pending และยังไม่หมดอายุ)
-  const upcomingAppointments = appointments.filter(ap => 
+  // นัดหมายที่กำลังจะมาถึง (ทุกคน - สำหรับ doctor)
+  const allUpcomingAppointments = appointments.filter(ap => 
     (!ap.status || ap.status === "pending") && !is_expired(ap.date, ap.time)
   ).sort((a, b) => {
     const dateA = new Date(a.date.split('T')[0] + 'T' + a.time);
     const dateB = new Date(b.date.split('T')[0] + 'T' + b.time);
     return dateA.getTime() - dateB.getTime();
   });
+
+  // นัดหมายที่กำลังจะมาถึง (เฉพาะของ user ที่ล็อกอิน)
+  const myUpcomingAppointments = appointments.filter(ap => 
+    (!ap.status || ap.status === "pending") && 
+    !is_expired(ap.date, ap.time) &&
+    user && ap.fname === user.fname && ap.lname === user.lname
+  ).sort((a, b) => {
+    const dateA = new Date(a.date.split('T')[0] + 'T' + a.time);
+    const dateB = new Date(b.date.split('T')[0] + 'T' + b.time);
+    return dateA.getTime() - dateB.getTime();
+  });
+
+  // เลือกตาม role
+  const upcomingAppointments = user?.role === "doctor" ? allUpcomingAppointments : myUpcomingAppointments;
 
   const format_date = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -196,7 +210,9 @@ export default function Dashboard() {
               <div className={styles.statLabel}>คิวที่รอดำเนินการ</div>
             </div>
             <div className={styles.statCard}>
-              <div className={styles.statNumber}>{allConfirmedToday.length}</div>
+              <div className={styles.statNumber}>
+                {user?.role === "doctor" ? allConfirmedToday.length : myConfirmedToday.length}
+              </div>
               <div className={styles.statLabel}>ยืนยันแล้ววันนี้</div>
             </div>
           </div>
@@ -244,39 +260,42 @@ export default function Dashboard() {
           {/* ========== คิวที่ยืนยันแล้ว ========== */}
           <div className={styles.appointmentsCard}>
             <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>✅ คิวที่ยืนยันแล้ววันนี้</h2>
+              <h2 className={styles.cardTitle}>คิวที่ยืนยันแล้ววันนี้</h2>
             </div>
-            {allConfirmedToday.length > 0 ? (
-              <div className={styles.appointmentList}>
-                {allConfirmedToday.map((ap) => {
-                  const { day, month } = format_date(ap.date);
-                  return (
-                    <div key={ap.ap_id} className={styles.appointmentItem}>
-                      <div className={`${styles.appointmentDate} ${styles.dateConfirmed}`}>
-                        <div className={styles.appointmentDay}>{day}</div>
-                        <div className={styles.appointmentMonth}>{month}</div>
-                      </div>
-                      <div className={styles.appointmentDetails}>
-                        <div className={styles.appointmentTitle}>
-                          {ap.title}{ap.fname} {ap.lname}
+            {(() => {
+              const confirmedList = user?.role === "doctor" ? allConfirmedToday : myConfirmedToday;
+              return confirmedList.length > 0 ? (
+                <div className={styles.appointmentList}>
+                  {confirmedList.map((ap) => {
+                    const { day, month } = format_date(ap.date);
+                    return (
+                      <div key={ap.ap_id} className={styles.appointmentItem}>
+                        <div className={`${styles.appointmentDate} ${styles.dateConfirmed}`}>
+                          <div className={styles.appointmentDay}>{day}</div>
+                          <div className={styles.appointmentMonth}>{month}</div>
                         </div>
-                        <div className={styles.appointmentTime}>
-                          {DEPT_ICONS[ap.dno] || "🏥"} {ap.department_name || "แผนกทั่วไป"} | เวลา {ap.time} น.
+                        <div className={styles.appointmentDetails}>
+                          <div className={styles.appointmentTitle}>
+                            {ap.title}{ap.fname} {ap.lname}
+                          </div>
+                          <div className={styles.appointmentTime}>
+                            {DEPT_ICONS[ap.dno] || "🏥"} {ap.department_name || "แผนกทั่วไป"} | เวลา {ap.time} น.
+                          </div>
+                        </div>
+                        <div className={styles.queueBadge}>
+                          <span className={styles.queueLabel}>คิว</span>
+                          <span className={styles.queueNumber}>{get_queue_code(ap)}</span>
                         </div>
                       </div>
-                      <div className={styles.queueBadge}>
-                        <span className={styles.queueLabel}>คิว</span>
-                        <span className={styles.queueNumber}>{get_queue_code(ap)}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className={styles.emptyState}>
-                <p>ยังไม่มีคิวที่ยืนยันวันนี้</p>
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className={styles.emptyState}>
+                  <p>ยังไม่มีคิวที่ยืนยันวันนี้</p>
+                </div>
+              );
+            })()}
           </div>
         </main>
       </div>
