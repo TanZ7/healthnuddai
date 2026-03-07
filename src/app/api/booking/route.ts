@@ -41,6 +41,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "คุณมีคิวจองในวันและเวลานี้แล้ว" }, { status: 400 });
     }
 
+    // ตรวจสอบ quota (รับ 6 คน ต่อช่วงเวลา ต่อแผนก)
+    const MAX_QUOTA_PER_PERIOD = 6;
+    const quotaCheck = await db.execute({
+      sql: `SELECT COUNT(*) as booked 
+            FROM appointments 
+            WHERE departmentId = ? 
+              AND date = ? 
+              AND time = ?
+              AND (status IS NULL OR status = 'pending' OR status = 'done')`,
+      args: [departmentId, date, time],
+    });
+
+    const currentBooked = Number(quotaCheck.rows[0]?.booked ?? 0);
+    if (currentBooked >= MAX_QUOTA_PER_PERIOD) {
+      return NextResponse.json({ error: "คิวในช่วงเวลานี้เต็มแล้ว กรุณาเลือกช่วงเวลาอื่น" }, { status: 400 });
+    }
 
     await db.execute({
       sql: `INSERT INTO appointments (
