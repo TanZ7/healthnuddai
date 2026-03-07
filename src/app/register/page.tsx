@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import styles from "./register.module.css";
+import { useRouter } from "next/navigation";
 
 
 const title_OPTIONS = ["นาย", "นาง", "นางสาว"] as const;
@@ -32,6 +33,7 @@ export default function RegisterPage() {
   const [message, set_message] = useState<string | null>(null);
   const [messageType, set_message_type] = useState<"error" | "success">("error");
 
+  const router = useRouter();
 
   const handle_change = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -104,6 +106,9 @@ export default function RegisterPage() {
     <main className={styles.container}>
       <div className={`${styles.circle} ${styles.circleTop}`}></div>
       <div className={`${styles.circle} ${styles.circleBottom}`}></div>
+        <button className={styles.backBtn} onClick={() => router.back()}>
+          &lt;
+        </button>
       <div className={styles.wrapper}>
         <div className={styles.leftcard}>
           <h1 className={styles.title}>สมัครสมาชิก</h1>
