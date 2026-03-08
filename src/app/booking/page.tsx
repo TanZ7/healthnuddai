@@ -184,7 +184,7 @@ function BirthDatePicker({ value, onChange }: { value: Date | null; onChange: (d
 
 export default function BookingPage() {
   const router = useRouter();
-  const { user, isLoading, load_user } = useAuthStore();
+  const {user, isLoading, load_user } = useAuthStore();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedDept, setSelectedDept] = useState<number | null>(null);

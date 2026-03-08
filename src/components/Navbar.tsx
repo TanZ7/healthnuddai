@@ -2,12 +2,37 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/lib/auth";
 import styles from "./Navbar.module.css";
 
 // หน้าที่ไม่ต้องแสดง Navbar
 const HIDDEN_NAVBAR_PATHS = ["/login", "/register"];
+
+type Notification = {
+  id: number;
+  title: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+// แปลงเวลาเป็นข้อความ "...ที่แล้ว"
+function formatTimeAgo(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "เมื่อสักครู่";
+  if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
+  if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
+  if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
+  return date.toLocaleDateString("th-TH");
+}
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -15,11 +40,35 @@ export default function Navbar() {
   const { user, logout, load_user } = useAuthStore();
   const [isMenuOpen, set_is_menu_open] = useState(false);
   const [notifyOpen, set_notify_open] = useState(false);
-  const [unreadCount, set_unread_count] = useState(2);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // ดึงข้อมูลแจ้งเตือนจาก API
+  const fetchNotifications = useCallback(async () => {
+    if (!user?.identification_number) return;
+
+    try {
+      const res = await fetch(`/api/notifications?user_id=${user.identification_number}`);
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(data.data.slice(0, 5)); // แสดงแค่ 5 รายการล่าสุด
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  }, [user?.identification_number]);
 
   useEffect(() => {
     load_user();
   }, [load_user]);
+
+  useEffect(() => {
+    if (user?.identification_number) {
+      fetchNotifications();
+      // รีเฟรชทุก 30 วินาที
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user?.identification_number, fetchNotifications]);
 
   // ไม่แสดง Navbar ในหน้า login และ register
   if (HIDDEN_NAVBAR_PATHS.includes(pathname)) {
@@ -47,10 +96,13 @@ export default function Navbar() {
     return item; 
   });
 
+  // นับจำนวนที่ยังไม่อ่าน
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
 const NotifyBell = () => (
   <div className={styles.notifyWrapper}>
     <button
-      onClick={() => { set_notify_open(!notifyOpen); if (!notifyOpen) set_unread_count(0); }}
+      onClick={() => set_notify_open(!notifyOpen)}
       className={styles.notifyButton}
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -67,19 +119,20 @@ const NotifyBell = () => (
         <div className={styles.notifyDropdown}>
           <div className={styles.notifyHeader}>การแจ้งเตือน</div>
           <ul className={styles.notifyList}>
-            {[
-              { id: 1, title: "ยืนยันนัดหมาย", message: "นัดหมายของคุณได้รับการยืนยันแล้ว", time: "5 นาทีที่แล้ว", read: false },
-              { id: 2, title: "แจ้งเตือนคิว", message: "คุณอยู่ในลำดับที่ 3 กรุณาเตรียมตัว", time: "20 นาทีที่แล้ว", read: false },
-            ].map((n) => (
-              <li key={n.id} className={`${styles.notifyItem} ${n.read ? styles.notifyItemRead : styles.notifyItemUnread}`}>
-                <span className={`${styles.notifyDot} ${n.read ? styles.notifyDotRead : styles.notifyDotUnread}`} />
-                <div>
-                  <div className={`${styles.notifyTitle} ${n.read ? styles.notifyTitleRead : styles.notifyTitleUnread}`}>{n.title}</div>
-                  <div className={styles.notifyMessage}>{n.message}</div>
-                  <div className={styles.notifyTime}>{n.time}</div>
-                </div>
-              </li>
-            ))}
+            {notifications.length === 0 ? (
+              <li className={styles.notifyEmpty}>ไม่มีการแจ้งเตือน</li>
+            ) : (
+              notifications.map((n) => (
+                <li key={n.id} className={`${styles.notifyItem} ${n.is_read ? styles.notifyItemRead : styles.notifyItemUnread}`}>
+                  <span className={`${styles.notifyDot} ${n.is_read ? styles.notifyDotRead : styles.notifyDotUnread}`} />
+                  <div>
+                    <div className={`${styles.notifyTitle} ${n.is_read ? styles.notifyTitleRead : styles.notifyTitleUnread}`}>{n.title}</div>
+                    <div className={styles.notifyMessage}>{n.message}</div>
+                    <div className={styles.notifyTime}>{formatTimeAgo(n.created_at)}</div>
+                  </div>
+                </li>
+              ))
+            )}
           </ul>
           <div className={styles.notifyFooter}>
             <Link href="/notifications" className={styles.notifyFooterLink} onClick={() => set_notify_open(false)}>ดูทั้งหมด</Link>
