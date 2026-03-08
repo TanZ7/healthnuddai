@@ -1,54 +1,141 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/auth";
 import styles from "./notifications.module.css";
+
+type NotificationType = "appointment" | "queue" | "system" | "booking" | "reminder" | "cancel";
 
 type Notification = {
   id: number;
+  user_id: string;
   title: string;
   message: string;
-  time: string;
-  read: boolean;
-  type: "appointment" | "queue" | "system";
-  queueNumber?: number;
-  currentQueue?: number;
+  type: NotificationType;
+  is_read: boolean;
+  created_at: string;
+  related_ap_id?: number;
 };
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  { id: 1, title: "ยืนยันนัดหมาย", message: "นัดหมายของคุณวันที่ 10 มี.ค. เวลา 10:00 น. ได้รับการยืนยันแล้ว", time: "5 นาทีที่แล้ว", read: false, type: "appointment" },
-  { id: 2, title: "แจ้งเตือนคิว", message: "คุณอยู่ในลำดับที่ 3 กรุณาเตรียมตัว", time: "20 นาทีที่แล้ว", read: false, type: "queue" },
-  { id: 3, title: "ใบสั่งยา", message: "ใบสั่งยาของคุณพร้อมแล้ว สามารถรับได้ที่เคาน์เตอร์ยา", time: "1 ชั่วโมงที่แล้ว", read: true, type: "medicine" },
-  { id: 4, title: "ยืนยันนัดหมาย", message: "นัดหมายของคุณวันที่ 5 มี.ค. เวลา 14:00 น. ได้รับการยืนยันแล้ว", time: "1 วันที่แล้ว", read: true, type: "appointment" },
-  { id: 5, title: "แจ้งเตือนระบบ", message: "ระบบจะปิดปรับปรุงในวันที่ 15 มี.ค. เวลา 00:00 - 06:00 น.", time: "2 วันที่แล้ว", read: true, type: "system" },
-  { id: 6, title: "แจ้งเตือนคิว", message: "ถึงคิวของคุณแล้ว กรุณาเข้าห้องตรวจ 3", time: "3 วันที่แล้ว", read: true, type: "queue" },
-];
-
-const TYPE_ICON: Record<Notification["type"], string> = {
+const TYPE_ICON: Record<NotificationType, string> = {
   appointment: "📅",
   queue: "🔢",
   system: "⚙️",
+  booking: "✅",
+  reminder: "⏰",
+  cancel: "❌",
 };
 
-export default function NotificationsPage() {
-  const [notifications, set_notifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
-  const [filter, set_filter] = useState<"all" | "unread">("all");
+// แปลงเวลาเป็นข้อความ "...ที่แล้ว"
+function formatTimeAgo(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  if (diffMins < 1) return "เมื่อสักครู่";
+  if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
+  if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
+  if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
+  return date.toLocaleDateString("th-TH");
+}
+
+export default function NotificationsPage() {
+  const router = useRouter();
+  const { user, isLoading, load_user } = useAuthStore();
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [loading, setLoading] = useState(true);
+
+  // ดึงข้อมูลแจ้งเตือนจาก API
+  const fetchNotifications = useCallback(async () => {
+    if (!user?.identification_number) return;
+
+    try {
+      const res = await fetch(`/api/notifications?user_id=${user.identification_number}`);
+      const data = await res.json();
+
+      if (data.success) {
+        setNotifications(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.identification_number]);
+
+  useEffect(() => {
+    load_user();
+  }, [load_user]);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/login");
+      return;
+    }
+
+    if (user) {
+      fetchNotifications();
+    }
+  }, [isLoading, user, router, fetchNotifications]);
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const filtered = filter === "unread"
-    ? notifications.filter((n) => !n.read)
+    ? notifications.filter((n) => !n.is_read)
     : notifications;
 
-  const mark_all_read = () => {
-    set_notifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  // อัปเดตเป็นอ่านทั้งหมด
+  const markAllRead = async () => {
+    if (!user?.identification_number) return;
+
+    try {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.identification_number,
+          mark_all: true,
+        }),
+      });
+
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    } catch (error) {
+      console.error("Error marking all read:", error);
+    }
   };
 
-  const mark_read = (id: number) => {
-    set_notifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  // อัปเดตเป็นอ่านทีละรายการ
+  const markRead = async (id: number) => {
+    try {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+    } catch (error) {
+      console.error("Error marking read:", error);
+    }
   };
+
+  if (isLoading || loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <p style={{ textAlign: "center", padding: "2rem" }}>กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -63,7 +150,7 @@ export default function NotificationsPage() {
             )}
           </div>
           {unreadCount > 0 && (
-            <button onClick={mark_all_read} className={styles.markAllBtn}>
+            <button onClick={markAllRead} className={styles.markAllBtn}>
               อ่านทั้งหมด
             </button>
           )}
@@ -73,13 +160,13 @@ export default function NotificationsPage() {
         <div className={styles.tabs}>
           <button
             className={`${styles.tab} ${filter === "all" ? styles.tabActive : ""}`}
-            onClick={() => set_filter("all")}
+            onClick={() => setFilter("all")}
           >
             ทั้งหมด ({notifications.length})
           </button>
           <button
             className={`${styles.tab} ${filter === "unread" ? styles.tabActive : ""}`}
-            onClick={() => set_filter("unread")}
+            onClick={() => setFilter("unread")}
           >
             ยังไม่ได้อ่าน ({unreadCount})
           </button>
@@ -96,20 +183,20 @@ export default function NotificationsPage() {
             {filtered.map((n) => (
               <li
                 key={n.id}
-                className={`${styles.item} ${!n.read ? styles.itemUnread : ""}`}
-                onClick={() => mark_read(n.id)}
+                className={`${styles.item} ${!n.is_read ? styles.itemUnread : ""}`}
+                onClick={() => !n.is_read && markRead(n.id)}
               >
-                <div className={styles.itemIcon}>{TYPE_ICON[n.type]}</div>
+                <div className={styles.itemIcon}>{TYPE_ICON[n.type] || "🔔"}</div>
                 <div className={styles.itemBody}>
                   <div className={styles.itemTop}>
-                    <span className={`${styles.itemTitle} ${!n.read ? styles.itemTitleUnread : ""}`}>
+                    <span className={`${styles.itemTitle} ${!n.is_read ? styles.itemTitleUnread : ""}`}>
                       {n.title}
                     </span>
-                    <span className={styles.itemTime}>{n.time}</span>
+                    <span className={styles.itemTime}>{formatTimeAgo(n.created_at)}</span>
                   </div>
                   <p className={styles.itemMessage}>{n.message}</p>
                 </div>
-                {!n.read && <span className={styles.dot} />}
+                {!n.is_read && <span className={styles.dot} />}
               </li>
             ))}
           </ul>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuthStore } from "@/lib/auth";
 import styles from "./dashboard.module.css";
 
@@ -15,6 +15,7 @@ interface Appointment {
   title: string;
   fname: string;
   lname: string;
+  identification_number?: string;
 }
 
 const DEPT_ICONS: { [key: number]: string } = {
@@ -29,6 +30,66 @@ const DEPT_ICONS: { [key: number]: string } = {
 export default function Dashboard() {
   const { user, isLoading, load_user } = useAuthStore();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const reminderSentRef = useRef(false);
+
+  // ส่ง reminder สำหรับนัดวันพรุ่งนี้
+  const checkAndSendReminders = useCallback(async (
+    userInfo: { identification_number: string; fname: string; lname: string },
+    appointmentsList: Appointment[]
+  ) => {
+    if (reminderSentRef.current) return; // ป้องกันการส่งซ้ำ
+    
+    try {
+      // หาวันพรุ่งนี้
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+      // กรองนัดหมายพรุ่งนี้ที่เป็นของ user และยังไม่ถูกยกเลิก
+      const tomorrowAppointments = appointmentsList.filter((ap) => {
+        const apDate = ap.date?.split("T")[0];
+        const validStatus = !ap.status || ap.status === "pending" || ap.status === "done";
+        const isMyAppointment = ap.fname === userInfo.fname && ap.lname === userInfo.lname;
+        return apDate === tomorrowStr && validStatus && isMyAppointment;
+      });
+
+      if (tomorrowAppointments.length === 0) return;
+
+      // ดึง notifications ที่มีอยู่แล้ว
+      const notifRes = await fetch(`/api/notifications?user_id=${userInfo.identification_number}`);
+      const notifData = await notifRes.json();
+      const existingReminders = notifData.success ? notifData.data : [];
+
+      // สร้าง reminder สำหรับนัดที่ยังไม่มี
+      for (const ap of tomorrowAppointments) {
+        const hasReminder = existingReminders.some(
+          (n: any) => n.type === "reminder" && n.related_ap_id === ap.ap_id
+        );
+
+        if (!hasReminder) {
+          const timeText = ap.time === "morning" || ap.time?.includes("08") 
+            ? "ช่วงเช้า (08:00-09:00 น.)" 
+            : "ช่วงบ่าย (12:00-13:00 น.)";
+          
+          await fetch("/api/notifications", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: userInfo.identification_number,
+              title: "⏰ เตือนนัดหมายพรุ่งนี้",
+              message: `คุณมีนัดหมาย${ap.department_name || "พบแพทย์"} ${timeText} อย่าลืมมาตามนัดนะคะ`,
+              type: "reminder",
+              related_ap_id: ap.ap_id,
+            }),
+          });
+        }
+      }
+
+      reminderSentRef.current = true;
+    } catch (error) {
+      console.error("Reminder check error:", error);
+    }
+  }, []);
 
   const is_expired = (appointmentDate: string, appointmentTime: string) => {
     if (!appointmentDate || !appointmentTime) return false;
@@ -77,6 +138,20 @@ export default function Dashboard() {
     load_user();
     fetch_appointments();
   }, [load_user, fetch_appointments]);
+
+  // เช็คและส่ง reminder เมื่อโหลดข้อมูลเสร็จ (เฉพาะ user ทั่วไป)
+  useEffect(() => {
+    if (user && user.role !== "doctor" && user.identification_number && appointments.length > 0) {
+      checkAndSendReminders(
+        { 
+          identification_number: user.identification_number, 
+          fname: user.fname, 
+          lname: user.lname 
+        }, 
+        appointments
+      );
+    }
+  }, [user, appointments, checkAndSendReminders]);
 
   // นัดหมายที่กำลังจะมาถึง (ทุกคน - สำหรับ doctor)
   const allUpcomingAppointments = appointments.filter(ap => 

@@ -126,34 +126,104 @@ const StaffQueuePage: React.FC = () => {
     return () => clearInterval(interval);
   }, [fetchQueueData]);
 
+  // ส่ง notification แจ้งคิว
+  const sendQueueNotification = async (patient: Patient, title: string, message: string) => {
+    if (!patient.identification_number) return;
+    
+    try {
+      await fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: patient.identification_number,
+          title,
+          message,
+          type: "queue",
+          related_ap_id: patient.ap_id,
+        }),
+      });
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
+  };
+
   const handleNext = async () => {
     if (waitingList.length === 0) {
       alert("ไม่มีคิวถัดไป");
       return;
     }
 
+    const nextPatient = waitingList[0];
+    const deptName = DEPT_NAMES[user?.dno || 0] || "ไม่ระบุ";
+
+    // แจ้งคนที่ถึงคิว
+    await sendQueueNotification(
+      nextPatient,
+      "ถึงคิวของคุณแล้ว",
+      `กรุณาเข้าพบแพทย์แผนก${deptName} คิวหมายเลข ${nextPatient.token}`
+    );
+
+    // แจ้งคนถัดไปว่าใกล้ถึงคิว
+    if (waitingList.length > 1) {
+      const upcomingPatient = waitingList[1];
+      await sendQueueNotification(
+        upcomingPatient,
+        "เตรียมตัว",
+        `คิวของคุณจะถึงเร็วๆนี้ แผนก${deptName} คิวหมายเลข ${upcomingPatient.token}`
+      );
+    }
+
     // คิวต่อไป
-    setCurrentQueue(waitingList[0]);
+    setCurrentQueue(nextPatient);
     setWaitingList(waitingList.slice(1));
     setServingTime(0);
   };
 
-  const handleRecall = () => {
+  const handleRecall = async () => {
     if (!currentQueue) return;
+    
+    const deptName = DEPT_NAMES[user?.dno || 0] || "ไม่ระบุ";
+    
+    // แจ้งเรียกซ้ำ
+    await sendQueueNotification(
+      currentQueue,
+      "เรียกซ้ำ",
+      `กรุณาเข้าพบแพทย์แผนก${deptName} คิวหมายเลข ${currentQueue.token}`
+    );
+    
     alert(`เรียกซ้ำคิว ${currentQueue.token}`);
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     if (!currentQueue) return;
     
+    const deptName = DEPT_NAMES[user?.dno || 0] || "ไม่ระบุ";
+    
+    // แจ้งคนที่ถูกข้ามว่าถูกข้ามไป (ย้ายไปรอท้ายคิว)
+    await sendQueueNotification(
+      currentQueue,
+      "⏭️ คิวของคุณถูกข้าม",
+      `คิว ${currentQueue.token} แผนก${deptName} ถูกข้ามชั่วคราว กรุณารอเรียกใหม่อีกครั้ง`
+    );
+    
     // ย้ายคิวปัจจุบันไปที่สุดท้าย
-    setWaitingList([...waitingList, currentQueue]);
+    const newWaitingList = [...waitingList, currentQueue];
     
     if (waitingList.length > 0) {
-      setCurrentQueue(waitingList[0]);
-      setWaitingList(waitingList.slice(1));
+      const nextPatient = waitingList[0];
+      
+      // แจ้งคนถัดไปว่าถึงคิว
+      await sendQueueNotification(
+        nextPatient,
+        "ถึงคิวของคุณแล้ว",
+        `กรุณาเข้าพบแพทย์แผนก${deptName} คิวหมายเลข ${nextPatient.token}`
+      );
+      
+      setCurrentQueue(nextPatient);
+      setWaitingList(newWaitingList.slice(1));
     } else {
       setCurrentQueue(null);
+      setWaitingList(newWaitingList);
     }
     setServingTime(0);
   };
