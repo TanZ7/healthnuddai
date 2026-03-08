@@ -211,7 +211,7 @@ export default function ProfilePage() {
           <div className={styles.avatar}>
             {/* 🐧 Prioritize Local Preview, then DB URL, then Initial */}
             {avatarPreview || user?.avatar_url ? (
-              <img src={avatarPreview || user?.avatar_url} alt="avatar" className={styles.avatarImg} />
+              <img src={avatarPreview ?? user?.avatar_url ?? undefined} alt="avatar" className={styles.avatarImg} />
             ) : (
               <div className={styles.avatarInitial}>
                 {user?.fname?.charAt(0) || "?"}
@@ -322,7 +322,7 @@ export default function ProfilePage() {
               <div className={styles.modalAvatar} onClick={() => fileInputRef.current?.click()}>
                 {/* 🐧 Updated Modal Preview */}
                 {avatarPreview || user?.avatar_url ? (
-                  <img src={avatarPreview || user?.avatar_url} alt="avatar" className={styles.avatarImg} />
+                  <img src={avatarPreview ?? user?.avatar_url ?? undefined} alt="avatar" className={styles.avatarImg} />
                 ) : (
                   <div className={styles.avatarInitial}>{user?.fname?.charAt(0) || "?"}</div>
                 )}

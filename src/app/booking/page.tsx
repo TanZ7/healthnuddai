@@ -44,6 +44,54 @@ const THAI_MONTHS_SHORT = [
   "ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.",
   "ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค.",
 ];
+interface ModalConfig {
+  open: boolean;
+  type: "success" | "error";
+  title: string;
+  message: string;
+  onConfirm?: () => void;
+}
+
+function AppModal({ config, onClose }: { config: ModalConfig; onClose: () => void }) {
+  if (!config.open) return null;
+
+  const isSuccess = config.type === "success";
+
+  const handleConfirm = () => {
+    onClose();
+    config.onConfirm?.();
+  };
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+        <div className={`${styles.modalIconWrap} ${isSuccess ? styles.modalIconSuccess : styles.modalIconError}`}>
+          {isSuccess ? (
+            <svg viewBox="0 0 52 52" className={styles.modalSvg}>
+              <circle cx="26" cy="26" r="25" fill="none" className={styles.modalCircle} />
+              <path fill="none" d="M14 27l7 7 17-17" strokeLinecap="round" strokeLinejoin="round" className={styles.modalCheck} />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 52 52" className={styles.modalSvg}>
+              <circle cx="26" cy="26" r="25" fill="none" className={styles.modalCircleError} />
+              <path fill="none" d="M16 16 L36 36 M36 16 L16 36" strokeLinecap="round" className={styles.modalCross} />
+            </svg>
+          )}
+        </div>
+
+        <h3 className={styles.modalTitle}>{config.title}</h3>
+        <p className={styles.modalMessage}>{config.message}</p>
+
+        <button
+          className={`${styles.modalBtn} ${isSuccess ? styles.modalBtnSuccess : styles.modalBtnError}`}
+          onClick={handleConfirm}
+        >
+          {isSuccess ? "เยี่ยมเลย!" : "รับทราบ"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function BirthDatePicker({ value, onChange }: { value: Date | null; onChange: (date: Date) => void }) {
   const [open, setOpen] = useState(false);
@@ -51,6 +99,7 @@ function BirthDatePicker({ value, onChange }: { value: Date | null; onChange: (d
   const defaultNav = () => { const d = new Date(); d.setFullYear(d.getFullYear() - 25); return new Date(d.getFullYear(), d.getMonth(), 1); };
   const [nav, setNav] = useState<Date>(value ? new Date(value.getFullYear(), value.getMonth(), 1) : defaultNav());
   const wrapRef = useRef<HTMLDivElement>(null);
+  
 
   useEffect(() => {
     if (!open) return;
@@ -148,6 +197,21 @@ export default function BookingPage() {
   const [quotaLoading, setQuotaLoading] = useState(false);
 
   const [birthDateObj, setBirthDateObj] = useState<Date | null>(null);
+
+  const [modal, setModal] = useState<ModalConfig>({
+  open: false,
+  type: "success",
+  title: "",
+  message: "",
+  });
+
+  const showModal = (type: "success" | "error", title: string, message: string, onConfirm?: () => void) => {
+    setModal({ open: true, type, title, message, onConfirm });
+  };
+
+  const closeModal = () => {
+    setModal(prev => ({ ...prev, open: false }));
+  };
 
   const [formData, setFormData] = useState({
     idNumber: "",
@@ -421,17 +485,16 @@ export default function BookingPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(`เกิดข้อผิดพลาด: ${data.error || "ไม่สามารถจองคิวได้ กรุณาลองใหม่"}`);
+        showModal("error", "เกิดข้อผิดพลาด", data.error || "ไม่สามารถจองคิวได้ กรุณาลองใหม่อีกครั้ง");
         return;
       }
 
-      alert("จองคิวสำเร็จเรียบร้อยครับ!");
+      showModal("success", "จองนัดหมายสำเร็จ! 🎉", "ระบบได้รับการจองของคุณเรียบร้อยแล้ว กรุณามาก่อนเวลานัด 15–30 นาที", () => router.push("/profile"));
       console.log("Success:", data);
-      router.push("/profile");
 
     } catch (error) {
       console.error("Fetch Error:", error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
+      showModal("error", "ไม่สามารถเชื่อมต่อได้", "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์ กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่");
     }
   };
 
@@ -441,6 +504,7 @@ export default function BookingPage() {
 
   return (
     <div className={styles.container}>
+      <AppModal config={modal} onClose={closeModal} />
       <div className={styles.headerBanner}>
         <h1 className={styles.mainTitle}>จองนัดหมาย</h1>
         <p className={styles.subtitle}>จองนัดออนไลน์ ง่ายและสะดวก</p>
