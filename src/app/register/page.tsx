@@ -107,7 +107,7 @@ export default function RegisterPage() {
       <div className={`${styles.circle} ${styles.circleTop}`}></div>
       <div className={`${styles.circle} ${styles.circleBottom}`}></div>
         <button className={styles.backBtn} onClick={() => router.back()}>
-          &lt;
+          ←
         </button>
       <div className={styles.wrapper}>
         <div className={styles.leftcard}>
